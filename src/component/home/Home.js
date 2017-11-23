@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import {Platform, StyleSheet, Text, View, StatusBar, Image, TouchableOpacity} from 'react-native';
+import {Platform, StyleSheet, Text, View, StatusBar, Image, TouchableOpacity, FlatList} from 'react-native';
 import SimpleLineIcons from 'react-native-vector-icons/dist/SimpleLineIcons';
 import Ionicons from 'react-native-vector-icons/dist/Ionicons';
 import {styles} from '../../assets/Styles';
@@ -19,15 +19,20 @@ export default class Home extends Component<{}> {
                     <View style={styles.center}>
                         <Image source={require('../../assets/images/logo.png')} style={{width: 200, height: 100, resizeMode:'contain'}}/>
                     </View>
+
                     <View style={[styles.row, {flex: 1}]}>
-                        <TouchableOpacity style={styles.center} onPress={()=>this.props.navigation.navigate('Menu')}>
+                        <TouchableOpacity
+                            onPress={()=>this.props.navigation.navigate('Catalog')}
+                            style={styles.center}>
                             <Ionicons name='ios-list' style={styles.icon}/>
                             <Text style={[styles.text]}>Thực đơn</Text>
                         </TouchableOpacity>
-                        <View style={[styles.center, styles.borderLeft]}>
+                        <TouchableOpacity
+                            onPress={()=>this.props.navigation.navigate('Order')}
+                            style={[styles.center, styles.borderLeft]}>
                             <Ionicons name='ios-restaurant-outline' style={styles.icon}/>
                             <Text style={[styles.text]}>Gọi món</Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <View style={[styles.row, {flex: 1}]}>
                         <View style={[styles.center, styles.borderTop, styles.borderBottom]}>
@@ -44,10 +49,12 @@ export default class Home extends Component<{}> {
                             <Ionicons name='ios-restaurant-outline' style={styles.icon}/>
                             <Text style={[styles.text]}>Gọi món</Text>
                         </View>
-                        <View style={[styles.center, styles.borderLeft]}>
+                        <TouchableOpacity
+                            onPress={()=>this.props.navigation.navigate('Setting')}
+                            style={[styles.center, styles.borderLeft]}>
                             <Ionicons name='ios-settings-outline' style={styles.icon}/>
                             <Text style={[styles.text]}>Thiết lập</Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>

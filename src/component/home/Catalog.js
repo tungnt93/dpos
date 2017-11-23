@@ -5,7 +5,8 @@ import SimpleLineIcons from 'react-native-vector-icons/dist/SimpleLineIcons';
 import Ionicons from 'react-native-vector-icons/dist/Ionicons';
 import {styles} from '../../assets/Styles';
 
-export default class Menu extends Component<{}> {
+
+export default class Catalog extends Component<{}> {
     static navigationOptions = ({ navigation }) => ({
         headerLeft:
             <TouchableOpacity onPress={() => {navigation.goBack()}}>
@@ -22,16 +23,34 @@ export default class Menu extends Component<{}> {
             </View>
     });
 
+    constructor(props){
+        super(props);
+        this.state = {
+            catalogs: []
+        }
+    }
+
+    // componentWillMount(){
+    //     let URL = 'http://127.0.0.1/restaurant/api/index/catalog';
+    //     fetch(URL)
+    //         .then((response)=> response.json())
+    //         .then((responseData)=>{
+    //             console.log(responseData.data);
+    //         });
+    // }
+
     render() {
         return (
             <View style={styles.container}>
                 <StatusBar backgroundColor="rgba(0,0,0,0.3)" translucent={true}/>
                 <ScrollView style={{flex: 1}}>
                     <View style={[styles.row, {paddingVertical: 15}]}>
-                        <View style={styles.center}>
+                        <TouchableOpacity
+                            onPress={()=>this.props.navigation.navigate('Menu', {catalog: {id: 1, name: 'Món khai vị'}})}
+                            style={styles.center}>
                             <Image source={require('../../assets/images/menu/khaivi.png')} style={styles.imgMenu}/>
                             <Text style={[styles.text, {marginTop: 6}]}>Khai vị</Text>
-                        </View>
+                        </TouchableOpacity>
                         <View style={styles.center}>
                             <Image source={require('../../assets/images/menu/thit.jpg')} style={styles.imgMenu}/>
                             <Text style={[styles.text, {marginTop: 6}]}>Món thịt</Text>
