@@ -6,7 +6,7 @@ import {Provider} from 'react-redux';
 import store from './redux/store';
 // import io from "react-native-socket.io-client";
 
-import { HomeStack } from './Route';
+import { HomeStack, LoginStack } from './Route';
 // import { getItem } from './function/AsyncStorage';
 
 export default class MyApp extends Component<{}> {
@@ -34,7 +34,7 @@ export default class MyApp extends Component<{}> {
 
     render() {
         return (
-            <HomeStack/>
+            <LoginStack/>
         );
     }
 }

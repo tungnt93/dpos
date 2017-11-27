@@ -19,18 +19,26 @@ export default class Login extends Component<{}> {
         this.state = {
             username: 'admin',
             password: 'adminA123',
-            api: 'http://10.0.2.2/restaurant/api/mobileapp/',
+            api: 'http://kyucxua.net/api/MobileApp/',
             step: 1
         }
     }
 
     componentWillMount(){
-        asyncStorage.getItem('api').then(res=>{
-            if(!res){
-                this.setState({step: 2});
+        asyncStorage.getItem('user').then(info=>{
+            console.log(info);
+            if(info){
+                this.gotoHome();
             }
             else{
-                this.setState({api: res})
+                asyncStorage.getItem('api').then(api=>{
+                    if(!api){
+                        this.setState({step: 2});
+                    }
+                    else{
+                        this.setState({api})
+                    }
+                });
             }
         });
     }
@@ -45,28 +53,32 @@ export default class Login extends Component<{}> {
         else{
             let username = this.state.username;
             let password = CryptoJS.MD5(this.state.password).toString();
-            // alert(password);
-            api.api(this.state.api + 'login', {"username": username, "password":  password}).then(res=>{
-                alert(res);
-                // let r = JSON.parse(res);
-                // if(r.status === 'success'){
-                //     asyncStorage.setItem('token', r.token);
-                //     asyncStorage.setItem('user', r.info, 'JSON').then(res=>{
-                //         let action = NavigationActions.reset({
-                //             index: 0,
-                //             key: null,
-                //             actions: [
-                //                 NavigationActions.navigate({ routeName: 'Home'})
-                //             ]
-                //         });
-                //         this.props.navigation.dispatch(action);
-                //     });
-                // }
-                // else{
-                //     alert(r.message.error);
-                // }
+            api.api(this.state.api + 'login', {username, password}).then(res=>{
+                // alert(res);
+                res = JSON.parse(res);
+                console.log(res.message.token);
+                if(res.status === 'success'){
+                    asyncStorage.setItem('token', res.message.token);
+                    asyncStorage.setItem('user', res.message.info, 'JSON').then(r=>{
+                        this.gotoHome();
+                    });
+                }
+                else{
+                    alert(res.message.error);
+                }
             })
         }
+    }
+
+    gotoHome(){
+        let action = NavigationActions.reset({
+            index: 0,
+            key: null,
+            actions: [
+                NavigationActions.navigate({ routeName: 'Home'})
+            ]
+        });
+        this.props.navigation.dispatch(action);
     }
 
     setLink(){
