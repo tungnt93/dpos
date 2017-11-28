@@ -38,11 +38,21 @@ const saveApi = (state = api, action) => {
     return state;
 };
 
+let socket = null;
+const saveSocket = (state = socket, action) => {
+    if(action.type === 'SAVE_SOCKET'){
+        socket = action.socket;
+        return socket;
+    }
+    return state;
+};
+
 const reducer = combineReducers({
     showLoading: showLoading,
     token: saveToken,
     user: saveUser,
-    api: saveApi
+    api: saveApi,
+    socket: saveSocket
 });
 
 const store = createStore(reducer, applyMiddleware(thunk));

@@ -21,10 +21,35 @@ class Login extends Component<{}> {
         this.state = {
             username: 'admin',
             password: 'adminA123',
-            api: 'http://kyucxua.net/api/MobileApp/',
+            // api: 'http://kyucxua.net/api/MobileApp/',
+            api: 'http://10.0.2.2/restaurant/api/MobileApp/',
             step: 1,
             showLoading: true
         }
+
+        // asyncStorage.getItem('user').then(info=>{
+        //     console.log(3333);
+        //     console.log(info);
+        //     if(info){
+        //         asyncStorage.getItem('token').then(token=>{
+        //             asyncStorage.getItem('api').then(api=>{
+        //                 this.gotoHome(token, info, api);
+        //             });
+        //         });
+        //     }
+        //     else{
+        //         console.log(11111);
+        //         asyncStorage.getItem('api').then(api=>{
+        //             if(!api){
+        //                 this.setState({step: 2, showLoading: false});
+        //             }
+        //             else{
+        //                 this.setState({api, showLoading: false})
+        //             }
+        //         });
+        //         // this.setState({showLoading: false})
+        //     }
+        // });
     }
 
     componentWillMount(){
@@ -49,6 +74,7 @@ class Login extends Component<{}> {
                         this.setState({api, showLoading: false})
                     }
                 });
+                // this.setState({showLoading: false})
             }
         });
 

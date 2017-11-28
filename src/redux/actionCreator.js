@@ -27,3 +27,7 @@ export function saveUser(user) {
 export function saveApi(api) {
     return {type: 'SAVE_API', api}
 }
+
+export function actionSaveSocket(socket) {
+    return {type: 'SAVE_SOCKET', socket}
+}
