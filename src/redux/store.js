@@ -11,8 +11,38 @@ const showLoading = (state = isLoading, action)=>{
     return isLoading;
 };
 
+let token = '';
+const saveToken = (state = token, action) => {
+    if(action.type === 'SAVE_TOKEN'){
+        token = action.token;
+        return token;
+    }
+    return state;
+};
+
+let user = null;
+const saveUser = (state = user, action) => {
+    if(action.type === 'SAVE_USER'){
+        user = action.user;
+        return user;
+    }
+    return state;
+};
+
+let api = '';
+const saveApi = (state = api, action) => {
+    if(action.type === 'SAVE_API'){
+        api = action.api;
+        return api;
+    }
+    return state;
+};
+
 const reducer = combineReducers({
-    showLoading: showLoading
+    showLoading: showLoading,
+    token: saveToken,
+    user: saveUser,
+    api: saveApi
 });
 
 const store = createStore(reducer, applyMiddleware(thunk));

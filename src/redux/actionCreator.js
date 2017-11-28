@@ -1,4 +1,4 @@
-import * as types from './types';
+
 
 export function actionIncrement() {
     return {type: 'INCREMENT'}
@@ -14,4 +14,16 @@ export function increment() {
     return dispatch => {
         dispatch(actionIncrement());
     }
+}
+
+export function saveToken(token) {
+    return {type: 'SAVE_TOKEN', token}
+}
+
+export function saveUser(user) {
+    return {type: 'SAVE_USER', user}
+}
+
+export function saveApi(api) {
+    return {type: 'SAVE_API', api}
 }

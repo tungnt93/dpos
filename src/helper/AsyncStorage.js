@@ -18,7 +18,7 @@ export const getItem = async(key) => {
         return '';
     }
     catch (error){
-        return '';
+        return error;
     }
 };
 

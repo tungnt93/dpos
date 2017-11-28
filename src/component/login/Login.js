@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import {Platform, StyleSheet, Text, View, StatusBar, Image, TouchableOpacity, Dimensions, TextInput} from 'react-native';
+import {Platform, StyleSheet, Text, View, StatusBar, Image, TouchableOpacity, Dimensions, TextInput, ActivityIndicator} from 'react-native';
 import {NavigationActions} from 'react-navigation';
 var CryptoJS =  require("crypto-js");
 import FontAwesome from 'react-native-vector-icons/dist/FontAwesome';
@@ -8,39 +8,50 @@ import Ionicons from 'react-native-vector-icons/dist/Ionicons';
 import {styles} from '../../assets/Styles';
 import * as asyncStorage from '../../helper/AsyncStorage';
 import * as api from '../../helper/Api';
+import { connect } from 'react-redux';
+import * as actionCreator from '../../redux/actionCreator';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 
-export default class Login extends Component<{}> {
+class Login extends Component<{}> {
     constructor(props){
         super(props);
         this.state = {
             username: 'admin',
             password: 'adminA123',
             api: 'http://kyucxua.net/api/MobileApp/',
-            step: 1
+            step: 1,
+            showLoading: true
         }
     }
 
     componentWillMount(){
+        console.log(2222);
         asyncStorage.getItem('user').then(info=>{
+            console.log(3333);
             console.log(info);
             if(info){
-                this.gotoHome();
+                asyncStorage.getItem('token').then(token=>{
+                    asyncStorage.getItem('api').then(api=>{
+                        this.gotoHome(token, info, api);
+                    });
+                });
             }
             else{
+                console.log(11111);
                 asyncStorage.getItem('api').then(api=>{
                     if(!api){
-                        this.setState({step: 2});
+                        this.setState({step: 2, showLoading: false});
                     }
                     else{
-                        this.setState({api})
+                        this.setState({api, showLoading: false})
                     }
                 });
             }
         });
+
     }
 
     login(){
@@ -53,14 +64,17 @@ export default class Login extends Component<{}> {
         else{
             let username = this.state.username;
             let password = CryptoJS.MD5(this.state.password).toString();
-            api.api(this.state.api + 'login', {username, password}).then(res=>{
+            api.api_post(this.state.api + 'login', '', {username, password}).then(res=>{
                 // alert(res);
                 res = JSON.parse(res);
                 console.log(res.message.token);
                 if(res.status === 'success'){
-                    asyncStorage.setItem('token', res.message.token);
-                    asyncStorage.setItem('user', res.message.info, 'JSON').then(r=>{
-                        this.gotoHome();
+                    asyncStorage.setItem('token', res.message.token).then(token=>{
+                        asyncStorage.setItem('user', res.message.info, 'JSON').then(user=>{
+                            asyncStorage.getItem('api').then(api=>{
+                                this.gotoHome(res.message.token, res.message.info, api);
+                            });
+                        });
                     });
                 }
                 else{
@@ -70,7 +84,10 @@ export default class Login extends Component<{}> {
         }
     }
 
-    gotoHome(){
+    gotoHome(token, user, api){
+        this.props.saveToken(token);
+        this.props.saveUser(user);
+        this.props.saveApi(api);
         let action = NavigationActions.reset({
             index: 0,
             key: null,
@@ -83,11 +100,12 @@ export default class Login extends Component<{}> {
 
     setLink(){
         if(this.state.api === ''){
-            alert(123);
+            alert('Link không được để trống!');
         }
         else{
             asyncStorage.setItem('api', this.state.api, 'TEXT').then(res=>{
                 this.setState({step: 1});
+                this.props.saveApi(this.state.api);
             });
         }
     }
@@ -98,13 +116,19 @@ export default class Login extends Component<{}> {
                 <StatusBar backgroundColor="rgba(0,0,0,0.3)" translucent={true}/>
                 <Image source={require('../../assets/images/bg.png')} style={{width, height, resizeMode:'stretch', position:'absolute'}}/>
                 <View style={{ flex: 1}}>
-                    <View style={[styles.center, {backgroundColor:'rgba(255,255,255,0.5)'}]}>
+                    <View style={[styles.center, {backgroundColor:'rgba(0,0,0,0.5)'}]}>
                         <Image source={require('../../assets/images/logo.png')} style={{width: 200, height: 100, resizeMode:'contain'}}/>
                     </View>
                     <View style={{flex: 2, backgroundColor:'rgba(0,0,0,0.5)', padding: 20}}>
                         {this.state.step === 1 ? this.formLogin() : this.formLink()}
                     </View>
                 </View>
+                {this.state.showLoading ?
+                    <View style={{width, height, position:'absolute', backgroundColor:'#fff', justifyContent:'center', alignItems:'center'}}>
+                        <ActivityIndicator size='large'/>
+                    </View>
+                    : null}
+
             </View>
         );
     }
@@ -165,3 +189,12 @@ export default class Login extends Component<{}> {
         )
     }
 }
+
+const mapStateToProps = (state) =>{
+    return{
+        token: state.token,
+        user: state.user
+    }
+};
+
+export default connect(mapStateToProps, actionCreator)(Login);

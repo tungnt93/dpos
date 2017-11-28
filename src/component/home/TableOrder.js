@@ -5,6 +5,10 @@ import SimpleLineIcons from 'react-native-vector-icons/dist/SimpleLineIcons';
 import Ionicons from 'react-native-vector-icons/dist/Ionicons';
 import {styles} from '../../assets/Styles';
 import {StrToLatin} from '../../helper/Helper';
+import {connect} from 'react-redux';
+import {api_get} from "../../helper/Api";
+import moment from 'moment';
+import {MoneyToText} from "../../helper/Helper";
 
 const ordereds = [
     {id: 6, name: 'Súp hải sản đậu phụ', quantity: 1, order_time: '19:01', price: 65000},
@@ -25,7 +29,7 @@ const products = [
     {id: 10, name: 'Bò nhúng giấm cuốn bánh tráng'},
 ];
 
-export default class TableOrder extends Component<{}> {
+class TableOrder extends Component<{}> {
     static navigationOptions = ({ navigation }) => ({
         header:
             <View style={[styles.headerStyle, {paddingTop: 10}]}>
@@ -43,17 +47,60 @@ export default class TableOrder extends Component<{}> {
             </View>
     });
 
+
     constructor(props){
         super(props);
+        this.products = [];
         this.state = {
             showAddOrder: false,
             showModalProduct: false,
-            products: products,
+            products: this.products,
             product: null,
             searchProduct: '',
             quantity: '',
             orders: [],
-            showPayment: false
+            showPayment: false,
+            payments: [],
+            ordereds: [],
+            pendings: [],
+            isOpen: false
+        };
+
+    }
+
+    componentWillMount(){
+        let table = this.props.navigation.state.params.table;
+        if(table.status !== 1){
+            this.setState({isOpen: true});
+            let URL = this.props.api + 'ordereds?bill_id=' + table.bill_id;
+            api_get(URL, (data)=>{
+                console.log(data.message.ordereds);
+                if(data.status === 'success'){
+                    let arrOrdereds = [];
+                    let arrPending = [];
+                    let arrPayment = [];
+                    data.message.ordereds.map((e)=>{
+                        if(e.status === 1){
+                            arrPending.push(e);
+                        }
+                        else if(e.status === 2){
+                            arrOrdereds.push(e);
+                        }
+                        if(e.status !== 4){
+                            arrPayment.push(e);
+                        }
+                    });
+                    this.setState({ordereds: arrOrdereds, pendings: arrPending, payments: arrPayment});
+                }
+            });
+
+            URL = this.props.api + 'all_product';
+            api_get(URL, (data)=>{
+                if(data.status === 'success'){
+                    this.products =  data.message.products;
+                    this.setState({products:  data.message.products});
+                }
+            });
         }
     }
 
@@ -67,50 +114,91 @@ export default class TableOrder extends Component<{}> {
         this.setState({showPayment : true})
     }
 
+    openTable(){
+
+    }
+
     render() {
         return (
             <View style={styles.container}>
                 <StatusBar backgroundColor="rgba(0,0,0,0.3)" translucent={true}/>
                 <ScrollView style={{flex: 1, backgroundColor:'#fff'}}>
-                    <Text style={[styles.text, styles.textSemibold, styles.textRed, {backgroundColor:'#F5FCFF', padding: 10}]}>
-                        Đang chờ
-                    </Text>
-                    <View style={{padding: 10}}>
-                        <Text style={[styles.text, {paddingVertical: 10}]}>Không có món nào</Text>
-                    </View>
-                    <Text style={[styles.text, styles.textSemibold, styles.textRed, {backgroundColor:'#F5FCFF', padding: 10}]}>
-                        Đã gọi
-                    </Text>
-                    <View style={[styles.row, styles.borderBottom, {padding: 10}]}>
-                        <Text style={[styles.text, styles.textSmall, styles.textSemibold,  {flex: 2}]}>Tên món</Text>
-                        <Text style={[styles.text, styles.textSmall,styles.textSemibold, {flex: 1, textAlign:'center'}]}>
-                            Số lượng
-                        </Text>
-                        <Text style={[styles.text, styles.textSmall, styles.textSemibold, {flex: 1, textAlign:'center'}]}>
-                            Thời gian
-                        </Text>
-                    </View>
-                    <FlatList
-                        data={ordereds}
-                        keyExtractor={(item, index) => index}
-                        renderItem = {({item})=>
-                            <View style={[styles.row, styles.borderBottom, {padding: 10, alignItems:'center'}]}>
-                                <Text style={[styles.text, {flex: 2}]}>{item.name}</Text>
-                                <Text style={[styles.text, {flex: 1, textAlign:'center'}]}>{item.quantity}</Text>
-                                <Text style={[styles.text, {flex: 1, textAlign:'center'}]}>{item.order_time}</Text>
-                            </View>
-                        }
-                    />
+                    {this.state.isOpen ?
+                        <View>
+                            <Text style={[styles.text, styles.textSemibold, styles.textRed, {backgroundColor:'#F5FCFF', padding: 10}]}>
+                                Đang chờ
+                            </Text>
+                            {this.state.pendings.length === 0 ?
+                                <View style={{padding: 10}}>
+                                    <Text style={[styles.text, {paddingVertical: 10}]}>Không có món nào</Text>
+                                </View>
+                                :
+                                this.listOrder(this.state.pendings)
+                            }
+
+                            <Text style={[styles.text, styles.textSemibold, styles.textRed, {backgroundColor:'#F5FCFF', padding: 10}]}>
+                                Đã gọi
+                            </Text>
+                            {this.state.ordereds.length === 0 ?
+                                <View style={{padding: 10}}>
+                                    <Text style={[styles.text, {paddingVertical: 10}]}>Không có món nào</Text>
+                                </View>
+                                :
+                                this.listOrder(this.state.ordereds)
+                            }
+                        </View>
+                        :
+                        <Text style={[styles.text, {padding: 50, textAlign:'center'}]}>Bàn chưa mở</Text>
+                    }
+
                 </ScrollView>
                 <View style={{padding: 10}}>
-                    <TouchableOpacity onPress={()=>this.setState({showAddOrder: true})}>
-                        <Text style={[styles.button]}>GỌI MÓN</Text>
-                    </TouchableOpacity>
+                    {this.state.isOpen ?
+                        <TouchableOpacity onPress={()=>this.setState({showAddOrder: true})}>
+                            <Text style={[styles.button]}>GỌI MÓN</Text>
+                        </TouchableOpacity>
+                        :
+                        <TouchableOpacity onPress={()=> this.openTable()}>
+                            <Text style={[styles.button]}>MỞ BÀN</Text>
+                        </TouchableOpacity>
+                    }
+
                 </View>
                 {this.modalAdd()}
                 {this.modalPayment()}
             </View>
         );
+    }
+
+    listOrder(list){
+        return(
+            <View>
+                <View style={[styles.row, styles.borderBottom, {padding: 10}]}>
+                    <Text style={[styles.text, styles.textSmall, styles.textSemibold,  {flex: 2}]}>Tên món</Text>
+                    <Text style={[styles.text, styles.textSmall,styles.textSemibold, {flex: 1, textAlign:'center'}]}>
+                        Số lượng
+                    </Text>
+                    <Text style={[styles.text, styles.textSmall, styles.textSemibold, {flex: 1, textAlign:'center'}]}>
+                        Thời gian
+                    </Text>
+                </View>
+                <FlatList
+                    data={list}
+                    keyExtractor={(item, index) => index}
+                    renderItem = {({item})=>
+                        <View style={[styles.row, styles.borderBottom, {padding: 10, alignItems:'center'}]}>
+                            <Text style={[styles.text, {flex: 2}]}>{item.product_name}</Text>
+                            <Text style={[styles.text, {flex: 1, textAlign:'center'}]}>{item.quantity}</Text>
+                            <Text style={[styles.text, styles.textSmall, {flex: 1, textAlign:'center'}]}>
+                                {moment.unix(item.created).format("DD/MM/YYYY") === moment().format("DD/MM/YYYY")
+                                    ? moment.unix(item.created).format("HH:mm")
+                                    : moment.unix(item.created).format("HH:mm DD/MM/YYYY")}
+                            </Text>
+                        </View>
+                    }
+                />
+            </View>
+        )
     }
 
     addOrder(){
@@ -218,7 +306,7 @@ export default class TableOrder extends Component<{}> {
                     <View style={{padding: 10, flexDirection: 'row'}}>
                         <TouchableOpacity
                             style={{flex: 2}}
-                            onPress={()=>this.setState({showAddOrder: true})}>
+                            onPress={()=>this.sendOrder()}>
                             <Text style={[styles.button]}>ĐỒNG Ý</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -233,8 +321,17 @@ export default class TableOrder extends Component<{}> {
         )
     }
 
+    sendOrder(){
+        if(this.state.orders.length === 0){
+            this.setState({showAddOrder: false, quantity: ''});
+        }
+        else{
+
+        }
+    }
+
     searchProduct(key){
-        let result = products.filter((e)=> StrToLatin(e.name.toLowerCase()).indexOf(StrToLatin(key.toLowerCase())) >= 0);
+        let result = this.products.filter((e)=> StrToLatin(e.name.toLowerCase()).indexOf(StrToLatin(key.toLowerCase())) >= 0);
         this.setState({searchProduct: key, products: result});
     }
 
@@ -301,10 +398,10 @@ export default class TableOrder extends Component<{}> {
                     </View>
                     <ScrollView keyboardShouldPersistTaps='always'>
                         <Text style={[styles.text, styles.textSemibold, styles.textRed, {backgroundColor:'#F5FCFF',padding: 10}]}>
-                            Danh sách ({ordereds.length})
+                            Danh sách ({this.state.payments.length})
                         </Text>
 
-                        {ordereds.length > 0 ?
+                        {this.state.payments.length > 0 ?
                             <View>
                                 <View style={[styles.row, styles.borderBottom, {padding: 10}]}>
                                     <Text style={[styles.text, styles.textSmall, styles.textSemibold, {flex: 2}]}>Tên món</Text>
@@ -319,22 +416,24 @@ export default class TableOrder extends Component<{}> {
                                     </Text>
                                 </View>
                                 <FlatList
-                                    data={ordereds}
+                                    data={this.state.payments}
                                     keyExtractor={(item, index) => index}
                                     renderItem = {({item})=>
                                         <View style={[styles.row, styles.borderBottom, {padding: 10, alignItems:'center'}]}>
-                                            <Text style={[styles.textSmall, {flex: 2}]}>{item.name}</Text>
+                                            <Text style={[styles.textSmall, {flex: 2}]}>{item.product_name}</Text>
                                             <Text style={[styles.textSmall, {flex: 1, textAlign:'center'}]}>{item.quantity}</Text>
-                                            <Text style={[styles.textSmall, {flex: 1, textAlign:'center'}]}>{item.price}đ</Text>
+                                            <Text style={[styles.textSmall, {flex: 1, textAlign:'center'}]}>{MoneyToText(item.product_price)}đ</Text>
                                             <Text style={[styles.textSmall,styles.textRed, {flex: 1, textAlign:'center'}]}>
-                                                {item.quantity*item.price}đ
+                                                {MoneyToText(item.quantity*item.product_price)}đ
                                                 </Text>
                                         </View>
                                     }
                                 />
                                 <View style={{flexDirection: 'row', padding: 10}}>
                                     <Text style={[{flex: 1},styles.text, styles.textSemibold]}>Tổng</Text>
-                                    <Text style={[{flex: 2, textAlign:'right'}, styles.text, styles.textSemibold, styles.textRed]}>10000000đ</Text>
+                                    <Text style={[{flex: 2, textAlign:'right'}, styles.text, styles.textSemibold, styles.textRed]}>
+                                        {this.totalMoney()} đ
+                                    </Text>
                                 </View>
                             </View>
                             : <Text style={[styles.text, {padding: 10}]}>Không có món nào</Text>}
@@ -343,7 +442,7 @@ export default class TableOrder extends Component<{}> {
                     <View style={{padding: 10, flexDirection: 'row'}}>
                         <TouchableOpacity
                             style={{flex: 2}}
-                            onPress={()=>this.setState({showAddOrder: true})}>
+                            onPress={()=>this.sendPayment()}>
                             <Text style={[styles.button]}>GỬI</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -357,4 +456,26 @@ export default class TableOrder extends Component<{}> {
             </Modal>
         )
     }
+
+    totalMoney(){
+        let total = 0;
+        this.state.payments.map((e)=>{
+           total += e.product_price;
+        });
+        return MoneyToText(total);
+    }
+
+    sendPayment(){
+
+    }
 }
+
+const mapStateToProps = (state) =>{
+    return{
+        user: state.user,
+        api: state.api,
+        token: state.token
+    }
+};
+
+export default connect(mapStateToProps)(TableOrder);

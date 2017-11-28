@@ -16,3 +16,17 @@ export const  StrToLatin = (str) => {
     str = str.replace(/Đ/g, "D");
     return str;
 };
+
+export const MoneyToText = (money) =>{
+    if(money === '' || money === 0) return 0;
+    money = money.toString();
+    while(money[0] === '0' || money[0] === ','){
+        money = money.slice(1);
+    }
+    let arr = money.replace(/\./g,'').split('');
+    let ii = arr.length;
+    while ((ii-=3) > 0) {
+        arr.splice(ii, 0, ',')
+    }
+    return arr.join('');
+};

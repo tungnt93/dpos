@@ -22,7 +22,7 @@ export default class Setting extends Component<{}> {
         return (
             <View style={styles.container}>
                 <StatusBar backgroundColor="rgba(0,0,0,0.3)" translucent={true}/>
-                <View style={{flex: 1, backgroundColor:'#fff'}}>
+                <View style={{flex: 1}}>
                     <View style={{flexDirection: 'row', backgroundColor:'#F5FCFF', padding: 10, alignItems:'center'}}>
                         <Text style={[styles.text, styles.textSemibold, styles.textRed, {flex :1}]}>
                             Website
@@ -32,7 +32,7 @@ export default class Setting extends Component<{}> {
                             <Ionicons name='ios-repeat' style={{marginLeft: 5, fontSize: 24, color: '#333'}}/>
                         </TouchableOpacity>
                     </View>
-                    <Text style={[styles.text, {padding: 10, paddingBottom: 20, textDecorationLine:'underline'}]}>http://myrestaurant.com</Text>
+                    <Text style={[styles.text, {padding: 10, paddingBottom: 20, textDecorationLine:'underline', backgroundColor:'#fff'}]}>http://myrestaurant.com</Text>
 
 
                     <View style={{flexDirection: 'row', backgroundColor:'#F5FCFF', padding: 10, alignItems:'center'}}>
@@ -44,11 +44,11 @@ export default class Setting extends Component<{}> {
                             <Ionicons name='ios-log-out' style={{marginLeft: 5, fontSize: 24, color: '#333'}}/>
                         </TouchableOpacity>
                     </View>
-                    <View style={[styles.row, styles.borderBottom, {padding: 10, alignItems:'center'}]}>
+                    <View style={[styles.row, styles.borderBottom, {padding: 10, alignItems:'center', backgroundColor:'#fff'}]}>
                         <Text style={[styles.textSmall, {flex: 1}]}>Tên đăng nhập</Text>
                         <Text style={[styles.text, styles.textSemibold, {flex: 1.5}]}>tungnt</Text>
                     </View>
-                    <View style={[styles.row, styles.borderBottom, {padding: 10, alignItems:'center'}]}>
+                    <View style={[styles.row, {padding: 10, alignItems:'center', backgroundColor:'#fff'}]}>
                         <Text style={[styles.textSmall, {flex: 1}]}>Vị trí</Text>
                         <Text style={[styles.text, styles.textSemibold, {flex: 1.5}]}>Nhân viên</Text>
                     </View>

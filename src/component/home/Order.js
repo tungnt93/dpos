@@ -4,6 +4,8 @@ import {Platform, StyleSheet, Text, View, StatusBar, Image, TouchableOpacity, Fl
 import SimpleLineIcons from 'react-native-vector-icons/dist/SimpleLineIcons';
 import Ionicons from 'react-native-vector-icons/dist/Ionicons';
 import {styles} from '../../assets/Styles';
+import {api_get} from "../../helper/Api";
+import {connect} from 'react-redux';
 
 const width = Dimensions.get('window').width;
 const tables = [
@@ -23,7 +25,7 @@ const tables = [
     {id: 14, name: 'Bàn 12', status: 0},
     {id: 15, name: 'Bàn 12', status: 0},
 ];
-export default class Order extends Component<{}> {
+class Order extends Component<{}> {
     static navigationOptions = ({ navigation }) => ({
         header:
             <View style={[styles.headerStyle, {paddingTop: 10}]}>
@@ -36,6 +38,25 @@ export default class Order extends Component<{}> {
             </View>
     });
 
+    constructor(props){
+        super(props);
+        this.state = {
+            tables: []
+        }
+    }
+
+    componentWillMount(){
+        // let catalog = this.props.navigation.state.params.catalog;
+        let URL = this.props.api + 'listTable';
+        console.log(URL);
+        api_get(URL, (data)=>{
+            console.log(data.message.tables);
+            if(data.status === 'success'){
+                this.setState({tables: data.message.tables});
+            }
+        });
+    }
+
     render() {
         return (
             <View style={styles.container}>
@@ -44,14 +65,14 @@ export default class Order extends Component<{}> {
                     <Text style={[styles.text, styles.textSemibold, {textAlign: 'center', paddingVertical: 10}]}>Danh sách bàn</Text>
                     <FlatList
                         style={{alignSelf: 'center'}}
-                        data={tables}
+                        data={this.state.tables}
                         keyExtractor={(item, index) => index}
                         renderItem = {({item})=>
                             <TouchableOpacity
                                 onPress={()=>this.props.navigation.navigate('TableOrder', {table: item})}
                                 style={[styles.border,{width: 90, height: 90, borderRadius: 45, alignItems:'center', justifyContent:'center',
                                     marginHorizontal: (width - 270)/6, marginVertical: 15}]}>
-                                <Ionicons name= {item.status === 1 ? 'ios-restaurant-outline' : (item.status === 2 ? 'ios-more' : 'ios-add')}
+                                <Ionicons name= {item.status === 2 ? 'ios-restaurant-outline' : (item.status === 3 ? 'ios-more' : 'ios-add')}
                                           style={styles.icon}/>
                                 <Text style={[styles.text, styles.textRed]}>{item.name}</Text>
                             </TouchableOpacity>
@@ -64,3 +85,13 @@ export default class Order extends Component<{}> {
         );
     }
 }
+
+const mapStateToProps = (state) => {
+    return{
+        user: state.user,
+        api: state.api,
+        token: state.token
+    }
+};
+
+export default connect(mapStateToProps)(Order);

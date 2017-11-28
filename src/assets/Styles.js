@@ -29,7 +29,7 @@ export const styles = {
         justifyContent:'center'
     },
     text:{
-        fontSize: 16,
+        fontSize: 14,
         fontFamily: "OpenSans-Light",
         color: '#333'
     },
@@ -40,7 +40,7 @@ export const styles = {
         color: '#C62828',
     },
     textSmall:{
-        fontSize: 14,
+        fontSize: 12,
         fontFamily: "OpenSans-Light",
         color: '#333'
     },
