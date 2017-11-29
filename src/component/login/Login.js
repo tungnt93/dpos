@@ -14,7 +14,6 @@ import * as actionCreator from '../../redux/actionCreator';
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-
 class Login extends Component<{}> {
     constructor(props){
         super(props);
@@ -211,6 +210,8 @@ class Login extends Component<{}> {
                     onPress={()=>this.setLink()}>
                     <Text style={[styles.button]}>TIẾP TỤC</Text>
                 </TouchableOpacity>
+
+
             </View>
         )
     }
